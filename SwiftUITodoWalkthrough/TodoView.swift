@@ -8,26 +8,48 @@
 import SwiftUI
 
 struct TodoView: View {
-    @State var todoSections = TodoSection.dummySections
+    @ObservedObject private var controller = TodoController.shared
+    
     var body: some View {
-        VStack {
-            HStack{
-                Text("Todos").font(.title)
-                    .padding(.leading, 25)
-                Spacer()
-            }
-            .padding()
-            .frame(height: 40)
-            
-            List {
-                ForEach($todoSections) { $section in
-                    Section(section.sectionTitle) {
-                        ForEach($section.todos) { $todo in
-                            TodoRowView(todo: $todo)
-                        }
+        NavigationStack {
+            VStack {
+                HStack{
+                    Text("Todos").font(.title)
+                        .padding(.leading, 25)
+                    Spacer()
+                    NavigationLink {
+                        CreateTodoView()
+                    } label: {
+                        Image(systemName: "plus")
+                            .padding(.trailing, 25)
+                            .font(.title.weight(.thin))
                     }
                 }
-            }.listStyle(.inset)
+                .padding()
+                .frame(height: 40)
+                
+                List {
+                    ForEach($controller.todoSections) { $section in
+                        Section(section.sectionTitle) {
+                            ForEach($section.todos) { $todo in
+                                TodoRowView(todo: $todo)
+                            }
+                            .onDelete { offsets in
+                                deleteTodo(at: offsets, from: section)
+                            }
+                        }
+                    }
+                }.listStyle(.inset)
+            }.toolbar(.hidden)
+        }
+        .onAppear {
+            controller.todoSections = TodoSection.dummySections
+        }
+    }
+    
+    func deleteTodo(at offsets: IndexSet, from section: TodoSection) {
+        if let index = controller.todoSections.firstIndex(of: section) {
+            controller.todoSections[index].todos.remove(atOffsets: offsets)
         }
     }
 }

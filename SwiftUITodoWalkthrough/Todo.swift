@@ -7,13 +7,17 @@
 
 import Foundation
 
-struct TodoSection: Identifiable {
+struct TodoSection: Identifiable, Hashable {
+    static func == (lhs: TodoSection, rhs: TodoSection) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     var id: UUID = UUID()
     var sectionTitle: String
     var todos: [Todo]
 }
 
-struct Todo: Identifiable {
+struct Todo: Identifiable, Hashable {
     var id: UUID = UUID()
     var markedComplete: Bool
     var title: String
